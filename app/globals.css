@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@tailwind utilities;
+
 
 @custom-variant dark (&:is(.dark *));
 
@@ -81,6 +83,8 @@
 
 body {
   font-family: var(--font-sans) sans-serif;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .dark {

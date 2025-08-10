@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
+import Menu from "@/src/components/Menu";
+import { SideBarProvider } from "@/src/context/sideBarContext";
+import { ConversationProvider } from "@/src/context/conversationContext";
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -19,7 +22,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${roboto.variable} antialiased`}>{children}</body>
+      <body className={`${roboto.variable} antialiased`}>
+        <Menu title="Chatea con nosotros" />
+        <SideBarProvider>
+          <ConversationProvider>{children}</ConversationProvider>
+        </SideBarProvider>
+      </body>
     </html>
   );
 }
