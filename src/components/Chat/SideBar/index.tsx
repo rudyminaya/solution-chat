@@ -6,6 +6,7 @@ import { ConversationType } from "@/src/types/chat";
 import EmptyResult from "@/src/components/EmptyResult";
 import List from "../../List";
 import { useShowSideBar } from "@/src/hooks/useShowSidebar";
+import { useConversation } from "@/src/hooks/useConversation";
 
 type Props = {
   conversations: ConversationType[];
@@ -44,14 +45,15 @@ const Overlay = ({ isOpen, onClick }: OverlayProps) => {
   );
 };
 
-const Sidebar = ({ conversations }: Props) => {
+const Sidebar = () => {
   const { isSideBarOpen, toggleSideBar } = useShowSideBar();
+  const { initConversation, conversations, findConversation } = useConversation();
   const handleSearch = (query: string) => {
-    console.log("Searching for:", query);
+    findConversation(query);
   };
 
   const handleNewChat = () => {
-    console.log("Starting new chat");
+    initConversation();
     toggleSideBar();
   };
 
@@ -61,10 +63,7 @@ const Sidebar = ({ conversations }: Props) => {
         isSideBarOpen ? "" : "pointer-events-none"
       }`}
     >
-      <Overlay
-        isOpen={isSideBarOpen}
-        onClick={toggleSideBar}
-      />
+      <Overlay isOpen={isSideBarOpen} onClick={toggleSideBar} />
       <aside
         className={`sidebar max-h-[500px] absolute z-2 w-full rounded-tl-3xl rounded-tr-3xl bg-white flex flex-col gap-4 pt-8 animate-slide-up ease-in-out duration-400 ${
           isSideBarOpen ? "bottom-0" : "bottom-[-100%]"

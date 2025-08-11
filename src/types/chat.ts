@@ -3,9 +3,15 @@ export enum Sender {
   System = "system",
 }
 
+export type OptionsMessageType = {
+  id: string;
+  label: string;  
+};
+
 export type MessageType = {
   attachments: string[];
   content: string;
+  options?: OptionsMessageType[];
   id: string;
   sender: Sender;
   timestamp: number;
