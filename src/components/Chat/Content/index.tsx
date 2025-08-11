@@ -1,11 +1,12 @@
 import { ConversationType, Sender } from "@/src/types/chat";
-import React, { Fragment, useContext } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import EmptyResult from "../../EmptyResult";
-import { Bot, SquarePen } from "lucide-react";
+import { Bot, Paperclip, Send, SquarePen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useConversation } from "@/src/hooks/useConversation";
 import { formatTimeSince } from "@/src/utils/functions";
 import { services } from "@/src/utils/service";
+import { Textarea } from "@/components/ui/textarea";
 
 const Content = () => {
   const {
@@ -13,7 +14,11 @@ const Content = () => {
     selectedConversation,
     setSelectedConversation,
     addMessage,
+    updateConversation,
   } = useConversation();
+  const [files, setFiles] = useState<File[]>([]);
+  
+
   const selectFirstOption = async (option: string, label: string) => {
     if (selectedConversation) {
       const newMessage = await services.getFirstAnswer(
@@ -51,7 +56,7 @@ const Content = () => {
             {formatTimeSince(selectedConversation.updatedAt)}
           </p>
         </div>
-        <div className="content__body p-4 flex flex-col gap-4 overflow-y-auto">
+        <div className="content__body p-4 flex flex-col gap-4 overflow-y-auto overflow-x-hidden">
           {selectedConversation.messages.map((message, index) => {
             return (
               <Fragment key={`chat-${message.id}-${index}`}>
@@ -62,7 +67,31 @@ const Content = () => {
                       : "place-self-end bg-gray-800"
                   } max-w-2/3`}
                 >
-                  {message.content}
+                  {message.attachments ? (
+                    <div className="flex flex-col">
+                      {message.attachments.map((file) => {
+                        const hasPreview =
+                          file.type.startsWith("image/") ||
+                          file.type.startsWith("video/");
+                        return (
+                          <div key={file.name} className="file">
+                            {hasPreview ? (
+                              <div className="file-preview">
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  alt={file.name}
+                                />
+                              </div>
+                            ) : (
+                              <div>{file.name}</div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div>{message.content}</div>
+                  )}
                 </div>
                 {Array.isArray(message.options) &&
                   message.options.length > 0 && (
@@ -86,7 +115,48 @@ const Content = () => {
             );
           })}
         </div>
-        <form className="content__footer p-4 border-t border-gray-200 bg-white min-h-[120px] max-h-[150px] h-full"></form>
+        <form className="content__footer p-4 border-t border-gray-200 bg-white min-h-[120px] max-h-[130px] h-full flex flex-col gap-2">
+          <div>
+            {selectedConversation.messages.map((c) => {
+              const allFiles = c.sender === Sender.User ? c.attachments : [];
+              return allFiles.map((file, index) => (
+                <div key={`file-${file.name}-${index}`} className="file">
+                  {file.name}
+                </div>
+              ));
+            })}
+          </div>
+          <div className="grid grid-cols-[1fr_auto] gap-2">
+            <Textarea
+              placeholder="Realiza tu consulta..."
+              className="resize-none"
+            />
+            <div className="flex flex-col items-center gap-4">
+              <input
+                type="file"
+                id="file-upload"
+                onChange={(e) => {
+                  if (e.target.files) {
+                    setFiles(Array.from(e.target.files));
+                  }
+                }}
+                accept=".png, .jpg, .jpeg, .pdf, .mp4"
+                className="invisible absolute pointer-none"
+              />
+              <label htmlFor="file-upload" className="cursor-pointer">
+                <Button
+                  disabled
+                  className="!bg-white text-gray-900 opacity-100 border !border-gray-400"
+                >
+                  <Paperclip />
+                </Button>
+              </label>
+              <Button type="submit" className="cursor-pointer">
+                <Send />
+              </Button>
+            </div>
+          </div>
+        </form>
       </section>
     );
   } else {

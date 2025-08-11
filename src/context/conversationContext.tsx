@@ -102,7 +102,7 @@ const reducer = (state: State, action: Action): State => {
     }
     case "UPDATE_CONVERSATION": {
       const conversationUpdated = state.conversations.find((c)=>c.id === action.payload.id);
-      if(conversationUpdated) services.updateConversation(conversationUpdated);
+      if(conversationUpdated) services.updateConversation(action.payload);
       return { ...state, conversations: state.conversations.map((c) => c.id === action.payload.id ? action.payload : c) };
     }
     case "SET_CONVERSATIONS": {

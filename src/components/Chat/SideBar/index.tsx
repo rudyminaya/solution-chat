@@ -47,7 +47,8 @@ const Overlay = ({ isOpen, onClick }: OverlayProps) => {
 
 const Sidebar = () => {
   const { isSideBarOpen, toggleSideBar } = useShowSideBar();
-  const { initConversation, conversations, findConversation } = useConversation();
+  const { initConversation, conversations, findConversation } =
+    useConversation();
   const handleSearch = (query: string) => {
     findConversation(query);
   };

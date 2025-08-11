@@ -49,8 +49,10 @@ export const handlers = [
         ) as ConversationType[];
         const idx = storedConversations.findIndex((c) => c.id === data.id);
         if (idx !== -1) {
-          const updatedMessages =
-            data.messages ?? storedConversations[idx].messages;
+          const updatedMessages = (data.messages ?? storedConversations[idx].messages).map(msg => ({
+            ...msg,
+            attachments: Array.isArray(msg.attachments) ? msg.attachments : []
+          }));
           const updatedConversation: ConversationType = {
             ...storedConversations[idx],
             ...data,
@@ -58,13 +60,12 @@ export const handlers = [
             updatedAt: new Date(),
           };
           const lastMsg = updatedMessages.at(-1);
-          if (
-            lastMsg &&
-            lastMsg.sender === Sender.User &&
-            lastMsg.content &&
-            lastMsg.content.length > 0
-          ) {
-            updatedConversation.title = lastMsg.content;
+          if (lastMsg) {
+            if (lastMsg.content && lastMsg.content.length > 0) {
+              updatedConversation.title = lastMsg.content;
+            } else if (lastMsg.attachments && lastMsg.attachments.length > 0) {
+              updatedConversation.title = "Archivo Enviado";
+            }
           }
           storedConversations[idx] = updatedConversation;
           localStorage.setItem(
