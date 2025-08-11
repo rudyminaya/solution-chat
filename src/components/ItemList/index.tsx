@@ -8,7 +8,7 @@ import { useShowSideBar } from "@/src/hooks/useShowSidebar";
 
 const ItemList = ({ id, title, updatedAt }: ConversationType) => {
     const descriptionDate = formatTimeSince(updatedAt);
-    const { removeConversation, selectConversation } = useConversation();
+    const { removeConversation, setSelectedConversation } = useConversation();
     const {toggleSideBar} = useShowSideBar()
     const [removing, setRemoving] = useState(false);
 
@@ -21,7 +21,7 @@ const ItemList = ({ id, title, updatedAt }: ConversationType) => {
     };
 
     const handleClick = () => {
-        selectConversation(id);
+        setSelectedConversation(id);
         toggleSideBar();
     };
 

@@ -1,13 +1,7 @@
 "use client";
-import { ConversationType } from "@/src/types/chat";
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useReducer,
-} from "react";
-import { dataConversations } from "../data/data";
+import { ConversationType, MessageType } from "@/src/types/chat";
+import { createContext, ReactNode, useEffect, useReducer } from "react";
+import { services } from "../utils/service";
 
 type State = {
   conversations: ConversationType[];
@@ -15,75 +9,108 @@ type State = {
 };
 type Action =
   | {
-      type: "INIT_CONVERSATION";
-      payload: ConversationType;
+      type: "SELECT_CONVERSATION";
+      payload: ConversationType | null; // conversation ID or null to deselect
     }
   | {
-      type: "REMOVE_CONVERSATION";
-      payload: string; // conversation ID
+      type: "FIND_CONVERSATIONS";
+      payload: string; // search keyword
+    }
+  | {
+      type: "SET_CONVERSATIONS";
+      payload: ConversationType[];
+    }
+  | {
+      type: "DELETE_CONVERSATION";
+      payload: string;
     }
   | {
       type: "UPDATE_CONVERSATION";
       payload: ConversationType;
     }
   | {
-      type: "SELECT_CONVERSATION";
-      payload: string; // conversation ID
-    };
+      type: "ADD_CONVERSATION";
+      payload: ConversationType;
+    }
+    | {
+        type: "ADD_MESSAGE";
+        payload: { conversationId: string; message: MessageType };
+    }
 
 const initialState: State = {
-  conversations: dataConversations,
+  conversations: [],
   selectedConversation: null,
 };
 
 const reducer = (state: State, action: Action): State => {
-  let newState: State;
   switch (action.type) {
-    case "INIT_CONVERSATION":
-      newState = {
+    case "SELECT_CONVERSATION": {
+      if (
+        state.selectedConversation &&
+        action.payload &&
+        state.selectedConversation.id === action.payload.id
+      ) {
+        return { ...state, selectedConversation: { ...action.payload } };
+      }
+      return { ...state, selectedConversation: action.payload };
+    }
+    case "FIND_CONVERSATIONS": {
+      const keyword = action.payload.toLowerCase();
+      const filteredConversations = state.conversations.filter((c) =>
+        c.title.toLowerCase().includes(keyword)
+      );
+      return { ...state, conversations: filteredConversations };
+    }
+    case "ADD_CONVERSATION": {
+      return {
         ...state,
         conversations: [...state.conversations, action.payload],
       };
-      break;
-    case "REMOVE_CONVERSATION":
-      newState = {
-        ...state,
-        conversations: state.conversations.filter(
-          (c) => c.id !== action.payload
-        ),
-      };
-      break;
-    case "UPDATE_CONVERSATION":
-      const updated = { ...action.payload };
-      const lastMsg = updated.messages[updated.messages.length - 1];
-      if (lastMsg && lastMsg.content && lastMsg.content.length > 0) {
-        updated.title = lastMsg.content;
+    }
+    case "DELETE_CONVERSATION": {
+      services.deleteConversation(action.payload);
+      const filteredConversations = state.conversations.filter(
+        (c) => c.id !== action.payload
+      );
+      if (state.selectedConversation?.id === action.payload) {
+        return {
+          ...state,
+          conversations: filteredConversations,
+          selectedConversation: null,
+        };
       }
-      newState = {
-        ...state,
-        conversations: state.conversations.map((c) =>
-          c.id === updated.id ? updated : c
-        ),
-      };
-      break;
-    case "SELECT_CONVERSATION":
-      newState = {
-        ...state,
-        selectedConversation: state.conversations.find(
-          (c) => c.id === action.payload
-        ) || null,
-      };
-      break;
+      return { ...state, conversations: filteredConversations };
+    }
+    case "ADD_MESSAGE": {
+        const { conversationId, message } = action.payload;
+        const conversation = state.conversations.find((c) => c.id === conversationId);
+        if (conversation) {
+          return {
+            ...state,
+            conversations: state.conversations.map((c) =>
+              c.id === conversationId
+                ? {
+                    ...c,
+                    messages: [...c.messages, message],
+                    title: message.sender === "user" ? message.content : c.title,
+                  }
+                : c
+            ),
+          };
+        }
+        return state;
+    }
+    case "UPDATE_CONVERSATION": {
+      const conversationUpdated = state.conversations.find((c)=>c.id === action.payload.id);
+      if(conversationUpdated) services.updateConversation(action.payload);
+      return { ...state, conversations: state.conversations.map((c) => c.id === action.payload.id ? action.payload : c) };
+    }
+    case "SET_CONVERSATIONS": {
+      return { ...state, conversations: action.payload };
+    }
     default:
-      newState = state;
-      break;
+      return state;
   }
-  typeof window !== "undefined" &&
-    localStorage.setItem(
-      "conversations",
-      JSON.stringify(newState.conversations)
-    );
-  return newState;
 };
 
 type ConversationContextType = {
@@ -91,28 +118,30 @@ type ConversationContextType = {
   dispatch: React.Dispatch<Action>;
 };
 
-export const ConversationContext = createContext<ConversationContextType | undefined>(
-  undefined
-);
+export const ConversationContext = createContext<
+  ConversationContextType | undefined
+>(undefined);
 
 export const ConversationProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
-
+  const getConversations = async () => {
+    const conversationList = await services.getConversations();
+    dispatch({
+      type: "SET_CONVERSATIONS",
+      payload: conversationList,
+    });
+  };
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("conversations");
-      if (stored) {
-        try {
-          const conversations = JSON.parse(stored);
-          conversations.forEach((conv: ConversationType) => {
-            dispatch({ type: "INIT_CONVERSATION", payload: conv });
-          });
-        } catch (e) {
-          console.error("Failed to parse conversations from localStorage", e);
-        }
-      }
-    }
+    getConversations();
   }, []);
+  useEffect(()=>{
+    if(state.selectedConversation && state.selectedConversation.id){
+        const selected = state.conversations.find(c => c.id === state.selectedConversation!.id);
+        if(selected) {
+          dispatch({ type: "SELECT_CONVERSATION", payload: selected });
+        }
+    }
+  },[state.conversations])
 
   return (
     <ConversationContext.Provider value={{ state, dispatch }}>

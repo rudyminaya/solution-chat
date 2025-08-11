@@ -3,7 +3,13 @@ import { Roboto } from "next/font/google";
 import "./globals.css";
 import Menu from "@/src/components/Menu";
 import { SideBarProvider } from "@/src/context/sideBarContext";
+import { MSWProvider } from "./msw-provider";
 import { ConversationProvider } from "@/src/context/conversationContext";
+
+if (process.env.NEXT_RUNTIME === "nodejs") {
+  const { server } = require("@/src/mocks/node");
+  server.listen();
+}
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -23,10 +29,12 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${roboto.variable} antialiased`}>
-        <Menu title="Chatea con nosotros" />
-        <SideBarProvider>
-          <ConversationProvider>{children}</ConversationProvider>
-        </SideBarProvider>
+        <MSWProvider>
+          <ConversationProvider>
+            <Menu title="Chatea con nosotros" />
+            <SideBarProvider>{children}</SideBarProvider>
+          </ConversationProvider>
+        </MSWProvider>
       </body>
     </html>
   );
