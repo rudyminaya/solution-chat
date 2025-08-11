@@ -30,3 +30,4 @@ npm run dev
 
 - **MSW** se activa automáticamente en desarrollo para interceptar y simular las respuestas de la API.
 - No necesitas configuración adicional para **Context**, ya está integrado en la aplicación.
+- Existe un issue de msw de la cual no existe documentación para resolverlo
