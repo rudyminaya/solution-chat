@@ -9,7 +9,7 @@ export type OptionsMessageType = {
 };
 
 export type MessageType = {
-  attachments: File[];
+  attachments: string[];
   content: string;
   options?: OptionsMessageType[];
   id: string;
