@@ -108,7 +108,7 @@ const Content = () => {
 
   if (selectedConversation) {
     return (
-      <section className="content flex flex-col justify-between flex-[1] overflow-y-auto">
+      <section className="content flex flex-col justify-between flex-[1] overflow-y-auto border border-r border-gray-200">
         <div className="content__header p-4 border-b border-gray-200 flex flex-col bg-white">
           <h3 className="font-semibold ">{selectedConversation.title}</h3>
           <p className="text-sm text-gray-500">
@@ -178,6 +178,12 @@ const Content = () => {
             <Textarea
               placeholder="Realiza tu consulta..."
               className="resize-none"
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit();
+                }
+              }}
             />
             <div className="flex flex-col items-center gap-4">
               <input
@@ -201,7 +207,7 @@ const Content = () => {
     );
   } else {
     return (
-      <div className="min-h-3/5 flex items-center justify-center">
+      <div className="min-h-3/5 flex items-center justify-center md:w-full">
         <EmptyResult
           icon={<Bot size={70} />}
           title="Bienvenido"

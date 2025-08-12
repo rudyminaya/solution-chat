@@ -16,6 +16,9 @@ Ejecuta:
 npm run dev
 ```
 
+> Una vez iniciado el servidor, podrás acceder a la aplicación en [http://localhost:3000](http://localhost:3000).
+
+
 ---
 
 ## Características principales

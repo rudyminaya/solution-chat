@@ -27,7 +27,7 @@ const ItemList = ({ id, title, updatedAt }: ConversationType) => {
 
     return (
         <div
-            className={`itemList bg-gray-100 p-4 rounded-lg ${removing ? "removing" : ""}`}
+            className={`itemList bg-gray-100 p-4 rounded-lg ${removing ? "removing" : ""} md:cursor-pointer`}
             onClick={handleClick}
         >
             <div className="itemList__header flex justify-between">

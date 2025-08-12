@@ -1,12 +1,13 @@
 "use client";
-import { ConversationType } from "@/src/types/chat";
 import React, { useState, useEffect } from "react";
 import ItemList from "../ItemList";
 import { useShowSideBar } from "@/src/hooks/useShowSidebar";
+import { useConversation } from "@/src/hooks/useConversation";
 
-const List = ({ conversations }: { conversations: ConversationType[] }) => {
+const List = () => {
   const { isSideBarOpen } = useShowSideBar();
   const [showFooter, setShowFooter] = useState(false);
+  const { conversations } = useConversation();
 
   useEffect(() => {
     if (isSideBarOpen) {

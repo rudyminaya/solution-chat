@@ -2,15 +2,10 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { MessagesSquare, SquarePen } from "lucide-react";
 import SearchInput from "@/src/components/SearchInput";
-import { ConversationType } from "@/src/types/chat";
 import EmptyResult from "@/src/components/EmptyResult";
 import List from "../../List";
 import { useShowSideBar } from "@/src/hooks/useShowSidebar";
 import { useConversation } from "@/src/hooks/useConversation";
-
-type Props = {
-  conversations: ConversationType[];
-};
 
 type OptionsProps = {
   onSearch: (query: string) => void;
@@ -37,9 +32,8 @@ const Options = ({ onSearch, handleNewChat }: OptionsProps) => {
 const Overlay = ({ isOpen, onClick }: OverlayProps) => {
   return (
     <div
-      className={`fixed inset-0 bg-black/80 z-[1] overflow-hidden animate-slide-up ease-in-out duration-400 ${
-        isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-      }`}
+      className={`md:hidden fixed inset-0 bg-black/80 z-[1] overflow-hidden animate-slide-up ease-in-out duration-400 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
       onClick={onClick}
     ></div>
   );
@@ -60,20 +54,18 @@ const Sidebar = () => {
 
   return (
     <section
-      className={`absolute top-0 h-full w-full overflow-hidden ${
-        isSideBarOpen ? "" : "pointer-events-none"
-      }`}
+      className={`absolute md:relative top-0 h-full w-full md:max-w-[300px] overflow-hidden border border-r border-gray-300 ${isSideBarOpen ? "" : "pointer-events-none md:pointer-events-auto"
+        }`}
     >
       <Overlay isOpen={isSideBarOpen} onClick={toggleSideBar} />
       <aside
-        className={`sidebar max-h-[500px] absolute z-2 w-full rounded-tl-3xl rounded-tr-3xl bg-white flex flex-col gap-4 pt-8 animate-slide-up ease-in-out duration-400 ${
-          isSideBarOpen ? "bottom-0" : "bottom-[-100%]"
-        }`}
+        className={`sidebar max-h-[500px] md:max-h-full absolute md:relative z-2 w-full rounded-tl-3xl rounded-tr-3xl bg-white flex flex-col gap-4 pt-8 animate-slide-up ease-in-out duration-400 ${isSideBarOpen ? "bottom-0" : "bottom-[-100%] md:bottom-0"
+          }`}
       >
         <Options onSearch={handleSearch} handleNewChat={handleNewChat} />
         <div className="conversations px-4 overflow-y-auto">
           {!!conversations.length ? (
-            <List conversations={conversations} />
+            <List />
           ) : (
             <EmptyResult
               icon={<MessagesSquare size={50} className="mb-4" />}

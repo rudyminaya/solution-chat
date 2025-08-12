@@ -6,25 +6,22 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Content from "./Content";
 import { useShowSideBar } from "@/src/hooks/useShowSidebar";
-import { useConversation } from "@/src/hooks/useConversation";
-type Props = {};
 
-const Chat = (props: Props) => {
-  const { conversations } = useConversation();
-  
+const Chat = () => {
+
   const { toggleSideBar } = useShowSideBar();
   return (
     <div className={styles.chatContainer}>
       <Button
         variant={"ghost"}
         onClick={toggleSideBar}
-        className="border-b border-gray-200 w-full p-4 h-auto text-base"
+        className="border-b border-gray-200 w-full p-4 h-auto text-base md:hidden"
       >
         <Menu />
         <span>Historial de Conversaciones</span>
       </Button>
-      <Content/>
-      <Sidebar conversations={conversations} />
+      <Content />
+      <Sidebar />
     </div>
   );
 };

@@ -13,6 +13,8 @@ export const useConversation = () => {
   }
   const { state, dispatch } = context;
 
+  console.log('STATE : ', state)
+
   const initConversation = async () => {
     const firstConversation = await services.createConversation();
     dispatch({

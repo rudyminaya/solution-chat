@@ -83,27 +83,36 @@ const reducer = (state: State, action: Action): State => {
     }
     case "ADD_MESSAGE": {
         const { conversationId, message } = action.payload;
-        const conversation = state.conversations.find((c) => c.id === conversationId);
-        if (conversation) {
-          return {
-            ...state,
-            conversations: state.conversations.map((c) =>
-              c.id === conversationId
-                ? {
-                    ...c,
-                    messages: [...c.messages, message],
-                    title: message.sender === "user" ? message.content : c.title,
-                  }
-                : c
-            ),
-          };
-        }
-        return state;
+        const updatedConversations = state.conversations.map((c) =>
+          c.id === conversationId
+            ? {
+                ...c,
+                messages: [...c.messages, message],
+                title: message.sender === "user" ? message.content : c.title,
+              }
+            : c
+        );
+        const updatedSelected = state.selectedConversation && state.selectedConversation.id === conversationId
+          ? updatedConversations.find(c => c.id === conversationId) || state.selectedConversation
+          : state.selectedConversation;
+        return {
+          ...state,
+          conversations: updatedConversations,
+          selectedConversation: updatedSelected,
+        };
     }
     case "UPDATE_CONVERSATION": {
       const conversationUpdated = state.conversations.find((c)=>c.id === action.payload.id);
       if(conversationUpdated) services.updateConversation(action.payload);
-      return { ...state, conversations: state.conversations.map((c) => c.id === action.payload.id ? action.payload : c) };
+      const updatedConversations = state.conversations.map((c) => c.id === action.payload.id ? action.payload : c);
+      const updatedSelected = state.selectedConversation && state.selectedConversation.id === action.payload.id
+        ? action.payload
+        : state.selectedConversation;
+      return {
+        ...state,
+        conversations: updatedConversations,
+        selectedConversation: updatedSelected,
+      };
     }
     case "SET_CONVERSATIONS": {
       return { ...state, conversations: action.payload };
@@ -134,6 +143,7 @@ export const ConversationProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     getConversations();
   }, []);
+  
   useEffect(()=>{
     if(state.selectedConversation && state.selectedConversation.id){
         const selected = state.conversations.find(c => c.id === state.selectedConversation!.id);
